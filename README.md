@@ -6,17 +6,19 @@ This repo has my writeup for the challenge posted on LinkedIn.
 
 ---
 
-"People lie! Git doesn't. That's the ONLY SSOT. May the master of the key know this!" =>
-
-Stuff given:
+"People lie! Git doesn't. That's the ONLY SSOT. May the master of the key know this!"
 
 HINT:
 Julius wants to help. So he left something here:
 
+```
 cookn://bdocpw.xjh/ozfdji-nkzzy/cmhn-xjhk-ntnozhn-yphk/omzz/hvdi
+```
 
-FLAG =>
+FLAG
+```
 YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IHNzaC1lZDI1NTE5IHBVT05LQSBGclNwUEwzNnBzVjZoUGVGdk9SVjFOOVRTd1JqRjdpTi9TaU81ckVudzFZCnl1WmlmV2diY2M2Smt5dFBmRFA4aW5JQ0loQTI0S1R3endlNmdmaTFSWEUKLS0tIE5yK0d3MFg5T0Vac0sxaGFNbUphcm9rbm1PUlRwVEZJNjRTZ0N3MTFFaTAKyJ9jMF/k1r9D3871i1PluzFDSo1kJZENZTI5+9HHPQLDlcTn9+xJmWIsrARtN7IrBzUp2lae9zH1T2xdI0Q1d5EAPBXP1MlNZGSb/X+5mNgPPLQucvWe3APKeGCtVB8BN5UVZREKbO/4iUP+wdgclw==
+```
 
 Flag format => string{string}
 
@@ -26,7 +28,7 @@ Flag format => string{string}
 
 ### STEP-1 : First look at the FLAG
 
-Looking at the FLAG format, it appears to be base64 encoded, and decoding it gives:
+Observing the flag format, it appears to be Base64 encoded. Decoding it produces:
 
 ```bash
 $ echo "YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IHNzaC1lZDI1NTE5IHBVT05LQSBGclNwUEwzNnBzVjZoUGVGdk9SVjFOOVRTd1JqRjdpTi9TaU81ckVudzFZCnl1WmlmV2diY2M2Smt5dFBmRFA4aW5JQ0loQTI0S1R3endlNmdmaTFSWEUKLS0tIE5yK0d3MFg5T0Vac0sxaGFNbUphcm9rbm1PUlRwVEZJNjRTZ0N3MTFFaTAKyJ9jMF/k1r9D3871i1PluzFDSo1kJZENZTI5+9HHPQLDlcTn9+xJmWIsrARtN7IrBzUp2lae9zH1T2xdI0Q1d5EAPBXP1MlNZGSb/X+5mNgPPLQucvWe3APKeGCtVB8BN5UVZREKbO/4iUP+wdgclw==" | base64 -d
@@ -38,19 +40,19 @@ e29���=Õ����I�b,�m7�+5)�V��1�Ol]#D5w�<���Md
 
 ```
 
-It looks like it was encrypted using age-encryption/v1 using SSH ED25519 public key. As age-encryption is an asymmetric encryption, I cant get any other info without the private key that was used to encrypt the flag.
+The output indicates that the data was encrypted using age-encryption/v1 with an SSH ED25519 public key. Since age-encryption is asymmetric, further decryption cannot be completed without the corresponding private key.
 
 ---
 
 ### STEP-2 : First look at the hint
 
-The hint was:
+The hint is:
 
 ```
 cookn://bdocpw.xjh/ozfdji-nkzzy/cmhn-xjhk-ntnozhn-yphk/omzz/hvdi
 ```
 
-looking at the format of this hint, this looks to be an encrypted link.
+Given the format, this appears to be an encrypted URL.
 
 Running it through the dcode cipher identifier, it gives the following possible ciphers:
 ![](./images/dcode-identify.png)
@@ -97,7 +99,7 @@ These policies allow an anonymous user to access/download the combined_salaries_
 
 ### STEP-4 : Anonymous S3 Access
 
-So listing the contents of the s3 bucket using aws cli and --no-sign-request flag to run the request as anonymous, we get:
+Using the AWS CLI with the --no-sign-request flag to access the bucket anonymously, the listing shows:
 
 ```bash
 $ aws s3 ls s3://tekion-hr-system-backup --no-sign-request
@@ -105,7 +107,7 @@ $ aws s3 ls s3://tekion-hr-system-backup --no-sign-request
 2025-03-27 16:23:02     614454 combined_salaries_backup.bin
 ```
 
-This shows the bucket has a folder named global-salaries and a file named combined_salaries_backup.bin. As we saw in the policies we cannot access the global-salaries folder as an anonymous user, but I was able to download the [combined_salaries_backup.bin](./files/s3-bucket/combined_salaries_backup.bin) file.
+The bucket contains a folder named global-salaries and a file named combined_salaries_backup.bin. Although the global-salaries folder is not accessible anonymously, I was able to download the [combined_salaries_backup.bin](./files/s3-bucket/combined_salaries_backup.bin) file.
 
 The combined_salaries_backup.bin appears to be a log-collection of binary data and get requests to data of various countries. The get requests are of the format:
 
@@ -113,7 +115,7 @@ The combined_salaries_backup.bin appears to be a log-collection of binary data a
 GET https://s3.amazonaws.com/[Country-Name]/salary-details_[Country-Code]
 ```
 
-As these requests also access a s3 bucket, I tried to acceess it but it says no such bucket exists. Other entries in the file are similar and practically no use.
+Since these requests target an S3 bucket and result in “no such bucket exists” errors, their content provides little direct use.
 
 ---
 
@@ -145,7 +147,7 @@ Default region name [us-west-1]: us-west-1
 Default output format [json]: json
 ```
 
-Now I tried accessing the 'tekion-hr-system-backup/global-salaries/hr_systems_salary_module.json' file but it gives 403 error. Looking back at the policies, I came across the following policy:
+Attempting to access the file tekion-hr-system-backup/global-salaries/hr_systems_salary_module.json yields a 403 error. Revisiting the policies reveals the following policy entry:
 
 ```
 {
@@ -161,11 +163,11 @@ Now I tried accessing the 'tekion-hr-system-backup/global-salaries/hr_systems_sa
 },
 ```
 
-Which states the file can only be accessed if the request is made via lambda.amazonaws.com.
+This states that the file can only be accessed if the request is made via lambda.amazonaws.com.
 
-In the lambda trust relation file we saw that any AWS user can assume the LambdaAccessRole, and this can be done using **aws sts**.
+Examining the lambda trust relation file shows that any AWS user can assume the LambdaAccessRole. This can be achieved using aws sts.
 
-First we need to get our account number.
+First get the account number.
 
 ```bash
 $ aws sts get-caller-identity
@@ -176,7 +178,7 @@ $ aws sts get-caller-identity
 }
 ```
 
-Next we need to assume the "LambdaAccessRole" role.
+Then, assume the "LambdaAccessRole" role:
 
 ```bash
 $ aws sts assume-role --role-arn "arn:aws:iam::116442029361:role/LambdaAccessRole" --role-session-name "tekion"
@@ -194,7 +196,7 @@ $ aws sts assume-role --role-arn "arn:aws:iam::116442029361:role/LambdaAccessRol
 }
 ```
 
-Now the AccessKeyID, SecretAccessKey and SessionToken neet to be exported to environment varibales.
+Now, export the new credentials:
 
 ```bash
 export AWS_ACCESS_KEY_ID="ASIARWHD4LUY5O67OGGL"
@@ -202,7 +204,7 @@ export AWS_SECRET_ACCESS_KEY="1Nhre2HoDBRzxI/RfoAEBilZNFNVP5O2y4R/nCUX"
 export AWS_SESSION_TOKEN="IQoJb3JpZ2luX2VjED8aCXVzLXdlc3QtMSJHMEUCIBhd8/4+u4ur0lHpK+6ljE+XMaKWCJxZI8k/TZKA73PaAiEA7deyEMmZsAxWEK4HvjHF0kRP4GoRtsLLT+zrkgvI73QqnAIIuP//////////ARAFGgwxMTY0NDIwMjkzNjEiDAaatKg+q+FV9VnKQCrwAdgfHwcoUePOqa7tr/EKP1mjFO4OcY+MqFhqaEb1w6ZKMcEGk9Lvm2j8BwiolBZ0drmRT8yuNwxfQJgnK1yFvKcttG4gX4tNUvRfmposabAqsMZ7gfxsStE2x3m/SLIrZAqnVgy5tyNDULwSniRG9NDRMd8KjaZsPJ7kbQWQUyDWv8N8RM0swH02fjltUybvUWchkDyCER/3hqcaAJuImDFCMFq19CSmp+HmGid0P2fbNql+PDMIYX4SUmneMtfdJQLkNKqB0Ytk7jDeYvrV9LCqC0HWumcjTtGE+qCd228xl7Tyhhm8pxqFx1Y8aO0x8TCy9+K/BjqdAZ6f8qn5Sz0KExL5DSkbbzB0xRW+3XvTV4ZQqLebdUdE+SkgUHi7CXj5Qd0MlKttEM4pyoVIPl48eE0bOXEDMcCvKtLaQHxsOJFJBVPHDIN+Ae1oVPOim64A8RdKYxf6FmGLH9iBBjapYfTDSvo5KAxwiavf8w/Gn2PxSrbuj/0R9iqcQWnEt4qojxQW981zRyR47JJ5K6L+QvDkSeY="
 ```
 
-Now the user role can be verified.
+Verify the new role:
 
 ```bash
 $ aws sts get-caller-identity
@@ -213,7 +215,7 @@ $ aws sts get-caller-identity
 }
 ```
 
-Now the file can be downloaded.
+Finally, download the file:
 
 ```bash
 aws s3 cp s3://tekion-hr-system-backup/global-salaries/hr_systems_salary_module.json ./
@@ -224,7 +226,7 @@ aws s3 cp s3://tekion-hr-system-backup/global-salaries/hr_systems_salary_module.
 
 ### STEP-7 : Looking at the new file
 
-Looking the the newly downloaded file, it did not appear to be a json. So I ran the file utility.
+Upon opening the the newly downloaded file, it did not appear to be a json. Running the file utility confirms:
 
 ```bash
 $ file hr_systems_salary_module.json
@@ -237,24 +239,24 @@ This shows that the file is actually a executable binary.
 
 ### STEP-8 : Pwning the .json
 
-First I ran a checksec on the binary to get any useful info:
+First running a checksec scan on the binary to get any useful info:
 
 ![](./images/checksec.png)
 
-This shows the binary has no canary, no PIE which can lead to buffer overflows.
+This shows the binary has no canary, no PIE, and executable stack.
 
-Now opening the binary in ida64.
+Now opening the binary in IDA64.
 ![](./images/main.png)
 
-This shows the main function calls the vulnerable_function, which has the decomp:
+This shows the main function calls the vulnerable_function, which is decompiled as:
 ![](./images/vuln_func.png)
 
 The vulnerable function calls gets on a stack varibale, which means we can send anynumber of bytes as input. And since there was no canary we can overwrite the saved rbp and rip to gain control of program flow.
 
-The function list also shows a hidden_function.
+The function list also reveals a hidden_function.
 ![](./images/hidden_func.png)
 
-The hidden function prints out what appears to be a SSH private key, which might be able to decrypt the FLAG file. As hidden_function is not called anywhere, we can use the vulnerability in the vulnerable_function to divert program flow to the hidden function.
+The hidden_function prints what appears to be an SSH private key—this might be used to decrypt the flag. Since the hidden_function is not called in normal execution, we can exploit the vulnerability in vulnerable_function to divert execution to this hidden function.
 
 This can be the done with the following script:
 
@@ -318,6 +320,7 @@ This give me the input words for:
 cb9f81491427f30112d8cd0ec97e97fc as 'seeker'
 
 This brings me to the final flag.
+
 
 ## Final FLAG:
 
