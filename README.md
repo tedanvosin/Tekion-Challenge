@@ -314,10 +314,13 @@ Looking at the 2 '-' separated strings between the curly braces, we can see that
 Next, I use https://crackstation.net/ to crack these strings:
 ![](./images/md5_crack.png)
 
-This give me the input words for:
+This tells me that:
 
-821ae63dbe0c573eff8b69d451fb21bc as 'curious'
-cb9f81491427f30112d8cd0ec97e97fc as 'seeker'
+821ae63dbe0c573eff8b69d451fb21bc is the md5hash of 'curious'
+
+and
+
+cb9f81491427f30112d8cd0ec97e97fc is the md5hash of 'seeker'
 
 This brings me to the final flag.
 
