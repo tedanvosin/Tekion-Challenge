@@ -16,6 +16,7 @@ cookn://bdocpw.xjh/ozfdji-nkzzy/cmhn-xjhk-ntnozhn-yphk/omzz/hvdi
 ```
 
 FLAG
+
 ```
 YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IHNzaC1lZDI1NTE5IHBVT05LQSBGclNwUEwzNnBzVjZoUGVGdk9SVjFOOVRTd1JqRjdpTi9TaU81ckVudzFZCnl1WmlmV2diY2M2Smt5dFBmRFA4aW5JQ0loQTI0S1R3endlNmdmaTFSWEUKLS0tIE5yK0d3MFg5T0Vac0sxaGFNbUphcm9rbm1PUlRwVEZJNjRTZ0N3MTFFaTAKyJ9jMF/k1r9D3871i1PluzFDSo1kJZENZTI5+9HHPQLDlcTn9+xJmWIsrARtN7IrBzUp2lae9zH1T2xdI0Q1d5EAPBXP1MlNZGSb/X+5mNgPPLQucvWe3APKeGCtVB8BN5UVZREKbO/4iUP+wdgclw==
 ```
@@ -251,7 +252,7 @@ Now opening the binary in IDA64.
 This shows the main function calls the vulnerable_function, which is decompiled as:
 ![](./images/vuln_func.png)
 
-The vulnerable function calls gets on a stack varibale, which means we can send anynumber of bytes as input. And since there was no canary we can overwrite the saved rbp and rip to gain control of program flow.
+The vulnerable function calls gets on a stack variable, which means we can send any number of bytes as input. And since there was no canary we can overwrite the saved rbp and rip to gain control of program flow.
 
 The function list also reveals a hidden_function.
 ![](./images/hidden_func.png)
@@ -312,6 +313,7 @@ The flag format says the flag is string{string}, so there is still more to be fi
 Looking at the 2 '-' separated strings between the curly braces, we can see that both strings are hex encoded bytes, thus we have 2, 16 bytes long strings.
 
 Next, I use https://crackstation.net/ to crack these strings:
+
 ![](./images/md5_crack.png)
 
 This tells me that:
@@ -324,8 +326,7 @@ cb9f81491427f30112d8cd0ec97e97fc is the md5hash of 'seeker'
 
 This brings me to the final flag.
 
-
-## Final FLAG:
+## Final FLAG :
 
 ```
 almost_there{curious_seeker}
